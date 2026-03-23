@@ -42,11 +42,13 @@ HyprtabWindow::HyprtabWindow() {
   click_controller->signal_pressed().connect(
       sigc::mem_fun(*this, &HyprtabWindow::onWindowClick));
   add_controller(click_controller);
+
+  set_child(mAppsBox);
 }
 
 bool HyprtabWindow::onWindowKeyPressed(guint keyval, guint keycode,
                                        Gdk::ModifierType state) {
-  if (keyval != GDK_KEY_space) {
+  if (keyval == GDK_KEY_q || keyval == GDK_KEY_Escape) {
     this->close();
 
     std::cout << "Done" << std::endl;
