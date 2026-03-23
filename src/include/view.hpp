@@ -2,6 +2,7 @@
 
 #include <gtkmm/flowbox.h>
 #include <gtkmm/liststore.h>
+#include <set>
 #include <vector>
 
 #include "icon.hpp"
@@ -17,6 +18,9 @@ constexpr int MAX_CHILDRENS_PER_LINE = 5;
 class CAppsView : public Gtk::FlowBox {
 private:
   std::vector<AppData> mAppDataVector;
+  std::set<std::string> mSeenClasses;
+  std::set<std::string> mDuplicatedClasses;
+
   CHyprlandChannel mChannel;
 
 public:

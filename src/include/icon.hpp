@@ -16,11 +16,12 @@ struct AppData {
   std::string className;
   std::string address;
   int focusHistoryID;
+  bool isDuplicated;
 
   AppData(std::string title, std::string className, std::string address,
-          int focusHistoryID)
+          int focusHistoryID, bool isDuplicated)
       : title(title), className(className), address(address),
-        focusHistoryID(focusHistoryID) {}
+        focusHistoryID(focusHistoryID), isDuplicated(isDuplicated) {}
 };
 
 class CAppIcon : public Gtk::Box {
@@ -40,7 +41,8 @@ public:
     this->set_orientation(Gtk::Orientation::VERTICAL);
 
     auto image = Gtk::make_managed<Gtk::Image>();
-    auto iconTitle = Gtk::make_managed<Gtk::Label>(className);
+    auto iconTitle =
+        Gtk::make_managed<Gtk::Label>(app.isDuplicated ? fullName : className);
 
     // set the icon image
     image->set_from_icon_name(className);

@@ -1,13 +1,14 @@
-#include "view.hpp"
-#include "gtkmm/enums.h"
-#include "gtkmm/flowboxchild.h"
-#include "gtkmm/object.h"
-#include "gtkmm/window.h"
-#include "icon.hpp"
-#include "ipc.hpp"
 #include <algorithm>
+#include <gtkmm/enums.h>
+#include <gtkmm/flowboxchild.h>
+#include <gtkmm/object.h>
+#include <gtkmm/window.h>
 #include <iostream>
 #include <string>
+
+#include "icon.hpp"
+#include "ipc.hpp"
+#include "view.hpp"
 
 namespace HyprTab {
 
@@ -43,15 +44,40 @@ CAppsView::CAppsView() {
 void CAppsView::setIcons(const json &icons) {
   this->remove_all();
   mAppDataVector.clear();
+  mSeenClasses.clear();
+  mDuplicatedClasses.clear();
+
+  if (!icons.is_array())
+    return;
+
+  // search for duplicates
+  for (auto &icon : icons) {
+    if (!icon.is_object())
+      continue;
+
+    std::string className = icon.value("class", "");
+
+    // if can not insert, then is a duplicated
+    if (!mSeenClasses.insert(className).second)
+      mDuplicatedClasses.insert(className);
+  }
 
   for (auto &icon : icons) {
-    std::string title = icon["title"];
-    std::string className = icon["class"];
-    std::string address = icon["address"];
-    int focusHistoryID = icon["focusHistoryID"];
+    if (!icon.is_object())
+      continue;
+
+    std::string className = icon.value("class", "");
+    std::string title = icon.value("title", "");
+    std::string address = icon.value("address", "");
+    int focusHistoryID = icon.value("focusHistoryID", -1);
+
+    if (title.empty() || className.empty())
+      continue;
+
+    bool isDuplicated = mDuplicatedClasses.count(className) > 0;
 
     mAppDataVector.push_back(
-        AppData(title, className, address, focusHistoryID));
+        AppData(title, className, address, focusHistoryID, isDuplicated));
   }
 
   std::sort(mAppDataVector.begin(), mAppDataVector.end(),
