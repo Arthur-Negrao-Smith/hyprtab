@@ -27,6 +27,7 @@ public:
   CAppsView();
 
   void setIcons(const json &icons);
+  void moveSelection(bool backwards);
 };
 
 } // namespace HyprTab

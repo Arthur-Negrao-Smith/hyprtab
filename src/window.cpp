@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sigc++/functors/mem_fun.h>
 
+#include "gdkmm/enums.h"
 #include "window.hpp"
 
 namespace HyprTab {
@@ -98,12 +99,25 @@ void HyprtabWindow::loadCss() {
 }
 
 bool HyprtabWindow::onWindowKeyPressed(guint keyval, guint /*keycode*/,
-                                       Gdk::ModifierType /*state*/) {
+                                       Gdk::ModifierType state) {
   if (keyval == GDK_KEY_q || keyval == GDK_KEY_Escape) {
     this->close();
 
     std::cout << "Quit key pressed!" << std::endl;
 
+    return true;
+  }
+
+  if (keyval == GDK_KEY_Tab || keyval == GDK_KEY_ISO_Left_Tab) {
+    bool backwards = (state & Gdk::ModifierType::SHIFT_MASK) !=
+                         Gdk::ModifierType::NO_MODIFIER_MASK ||
+                     keyval == GDK_KEY_ISO_Left_Tab;
+    mAppsBox.moveSelection(backwards);
+    return true;
+  }
+
+  if (keyval == GDK_KEY_ISO_Left_Tab) {
+    mAppsBox.moveSelection(true);
     return true;
   }
 

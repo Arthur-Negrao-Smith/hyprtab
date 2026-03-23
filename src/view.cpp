@@ -92,4 +92,32 @@ void CAppsView::setIcons(const json &icons) {
   }
 }
 
+void CAppsView::moveSelection(bool backwards) {
+  if (mAppDataVector.empty())
+    return;
+
+  int totalItems = mAppDataVector.size();
+  int currentIndex = -1;
+
+  auto selectedList = this->get_selected_children();
+  if (!selectedList.empty())
+    currentIndex = selectedList[0]->get_index();
+
+  int nextIndex = 0;
+
+  if (currentIndex != -1) {
+    if (backwards) {
+      nextIndex = (currentIndex - 1) % totalItems;
+    } else {
+      nextIndex = (currentIndex + 1) % totalItems;
+    }
+  }
+
+  auto nextChild = this->get_child_at_index(nextIndex);
+  if (nextChild) {
+    this->select_child(*nextChild);
+    nextChild->grab_focus();
+  }
+}
+
 } // namespace HyprTab
