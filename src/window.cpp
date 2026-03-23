@@ -40,6 +40,8 @@ HyprtabWindow::HyprtabWindow() {
   auto controller = Gtk::EventControllerKey::create();
   controller->signal_key_pressed().connect(
       sigc::mem_fun(*this, &HyprTab::HyprtabWindow::onWindowKeyPressed), false);
+  controller->signal_key_released().connect(
+      sigc::mem_fun(*this, &HyprtabWindow::onWindowKeyReleased), false);
 
   add_controller(controller);
 
@@ -75,8 +77,8 @@ void HyprtabWindow::loadCss() {
           "  background-color: rgba(0.234, 0.234, 0.234, 1.0); "
           "} "
           "flowboxchild { "
-          "  min-width: 100px;"
-          "  min-height: 100px;"
+          "  min-width: 120px;"
+          "  min-height: 120px;"
           "  border-radius: 12px; "
           "  padding: 8px; "
           "} "
@@ -100,15 +102,10 @@ void HyprtabWindow::loadCss() {
 
 bool HyprtabWindow::onWindowKeyPressed(guint keyval, guint /*keycode*/,
                                        Gdk::ModifierType state) {
-  if (keyval == GDK_KEY_q || keyval == GDK_KEY_Escape) {
-    this->close();
-
-    std::cout << "Quit key pressed!" << std::endl;
-
-    return true;
-  }
-
-  if (keyval == GDK_KEY_Tab || keyval == GDK_KEY_ISO_Left_Tab) {
+  // navigation
+  switch (keyval) {
+  case GDK_KEY_Tab:
+  case GDK_KEY_ISO_Left_Tab: {
     bool backwards = (state & Gdk::ModifierType::SHIFT_MASK) !=
                          Gdk::ModifierType::NO_MODIFIER_MASK ||
                      keyval == GDK_KEY_ISO_Left_Tab;
@@ -116,12 +113,49 @@ bool HyprtabWindow::onWindowKeyPressed(guint keyval, guint /*keycode*/,
     return true;
   }
 
-  if (keyval == GDK_KEY_ISO_Left_Tab) {
-    mAppsBox.moveSelection(true);
+  // modifiers, arrow navigation and Alt
+  case GDK_KEY_Left:
+  case GDK_KEY_Right:
+  case GDK_KEY_Down:
+  case GDK_KEY_Up:
+  case GDK_KEY_Shift_L:
+  case GDK_KEY_Shift_R:
+  case GDK_KEY_Alt_L:
+  case GDK_KEY_Alt_R:
+    return false;
+
+  // confirmation
+  case GDK_KEY_Return:
+  case GDK_KEY_KP_Enter:
+  case GDK_KEY_space: {
+    auto selectedList = mAppsBox.get_selected_children();
+    if (!selectedList.empty()) {
+      mAppsBox.changeFocus(selectedList[0]);
+    } else {
+      this->close();
+    }
     return true;
   }
 
-  return false;
+  default:
+    std::cout << "Quit event emited" << std::endl;
+    this->close();
+    return true;
+  }
+}
+
+void HyprtabWindow::onWindowKeyReleased(guint keyval, guint /*keycode*/,
+                                        Gdk::ModifierType /*state*/) {
+  if (keyval == GDK_KEY_Alt_L || keyval == GDK_KEY_Alt_R) {
+
+    auto selectedList = mAppsBox.get_selected_children();
+
+    if (!selectedList.empty()) {
+      mAppsBox.changeFocus(selectedList[0]);
+    } else {
+      this->close();
+    }
+  }
 }
 
 void HyprtabWindow::onWindowClick(int /*n_press*/, double click_x,

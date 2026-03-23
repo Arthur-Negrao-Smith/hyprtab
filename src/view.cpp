@@ -4,6 +4,7 @@
 #include <gtkmm/object.h>
 #include <gtkmm/window.h>
 #include <iostream>
+#include <sigc++/functors/mem_fun.h>
 #include <string>
 
 #include "icon.hpp"
@@ -19,23 +20,8 @@ CAppsView::CAppsView() {
   this->set_valign(Gtk::Align::CENTER);
   this->set_max_children_per_line(MAX_CHILDRENS_PER_LINE);
 
-  this->signal_child_activated().connect([this](Gtk::FlowBoxChild *child) {
-    auto appIcon = dynamic_cast<CAppIcon *>(child->get_child());
-
-    if (appIcon) {
-      std::string command = "dispatch focuswindow address:" + appIcon->address;
-
-      std::cout << "Running: " << command << std::endl;
-
-      mChannel.request(command);
-
-      auto window = dynamic_cast<Gtk::Window *>(this->get_root());
-      if (window) {
-        std::cout << "Changing focus to: " << appIcon->fullName;
-        window->close();
-      }
-    }
-  });
+  this->signal_child_activated().connect(
+      sigc::mem_fun(*this, &CAppsView::changeFocus));
 
   auto response = json::parse(mChannel.request("j/clients"));
   setIcons(response);
@@ -117,6 +103,24 @@ void CAppsView::moveSelection(bool backwards) {
   if (nextChild) {
     this->select_child(*nextChild);
     nextChild->grab_focus();
+  }
+}
+
+void CAppsView::changeFocus(Gtk::FlowBoxChild *child) {
+  auto appIcon = dynamic_cast<CAppIcon *>(child->get_child());
+
+  if (appIcon) {
+    std::string command = "dispatch focuswindow address:" + appIcon->address;
+
+    std::cout << "Running: " << command << std::endl;
+
+    mChannel.request(command);
+
+    auto window = dynamic_cast<Gtk::Window *>(this->get_root());
+    if (window) {
+      std::cout << "Changing focus to: " << appIcon->fullName;
+      window->close();
+    }
   }
 }
 

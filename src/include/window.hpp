@@ -11,6 +11,8 @@ private:
   CAppsView mAppsBox;
 
   bool onWindowKeyPressed(guint keyval, guint keycode, Gdk::ModifierType state);
+  void onWindowKeyReleased(guint keyval, guint keycode,
+                           Gdk::ModifierType state);
   void onWindowClick(int n_press, double click_x, double click_y);
   void loadCss();
 

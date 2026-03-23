@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 
+#include "gtkmm/flowboxchild.h"
 #include "icon.hpp"
 #include "ipc.hpp"
 #include "json.hpp"
@@ -28,6 +29,7 @@ public:
 
   void setIcons(const json &icons);
   void moveSelection(bool backwards);
+  void changeFocus(Gtk::FlowBoxChild *child);
 };
 
 } // namespace HyprTab
