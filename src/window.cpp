@@ -46,12 +46,12 @@ HyprtabWindow::HyprtabWindow() {
   set_child(mAppsBox);
 }
 
-bool HyprtabWindow::onWindowKeyPressed(guint keyval, guint keycode,
-                                       Gdk::ModifierType state) {
+bool HyprtabWindow::onWindowKeyPressed(guint keyval, guint /*keycode*/,
+                                       Gdk::ModifierType /*state*/) {
   if (keyval == GDK_KEY_q || keyval == GDK_KEY_Escape) {
     this->close();
 
-    std::cout << "Done" << std::endl;
+    std::cout << "Quit key pressed!" << std::endl;
 
     return true;
   }
@@ -59,7 +59,8 @@ bool HyprtabWindow::onWindowKeyPressed(guint keyval, guint keycode,
   return false;
 }
 
-void HyprtabWindow::onWindowClick(int n_press, double click_x, double click_y) {
+void HyprtabWindow::onWindowClick(int /*n_press*/, double click_x,
+                                  double click_y) {
   double flowbox_x, flowbox_y;
 
   mAppsBox.translate_coordinates(*this, 0, 0, flowbox_x, flowbox_y);
