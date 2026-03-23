@@ -12,6 +12,7 @@ private:
 
   bool onWindowKeyPressed(guint keyval, guint keycode, Gdk::ModifierType state);
   void onWindowClick(int n_press, double click_x, double click_y);
+  void loadCss();
 
 public:
   HyprtabWindow();

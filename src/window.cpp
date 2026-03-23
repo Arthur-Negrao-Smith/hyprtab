@@ -24,13 +24,17 @@ HyprtabWindow::HyprtabWindow() {
 
   // keyboard input
   gtk_layer_set_keyboard_mode(this->gobj(),
-                              GTK_LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND);
+                              GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE);
 
-  set_title("hyprtab");
-  set_default_size(200, 200);
+  this->set_title("hyprtab");
+  this->set_default_size(200, 200);
 
-  set_resizable(true);
-  set_decorated(false);
+  this->set_resizable(true);
+  this->set_decorated(false);
+
+  this->set_name("hyprtab-window");
+
+  this->loadCss();
 
   auto controller = Gtk::EventControllerKey::create();
   controller->signal_key_pressed().connect(
@@ -44,6 +48,53 @@ HyprtabWindow::HyprtabWindow() {
   add_controller(click_controller);
 
   set_child(mAppsBox);
+}
+
+void HyprtabWindow::loadCss() {
+  auto cssProvider = Gtk::CssProvider::create();
+
+  std::string configPath =
+      std::string(std::getenv("HOME")) + "/.config/hyprtab/style.css";
+  auto cssFile = Gio::File::create_for_path(configPath);
+
+  try {
+    if (cssFile->query_exists()) {
+      cssProvider->load_from_file(cssFile);
+      std::cout << "Load a custom Css: " << configPath << std::endl;
+    } else {
+      // default global css
+      cssProvider->load_from_data(
+          "window#hyprtab-window, window#hyprtab-window decoration { "
+          "  background: transparent; "
+          "  background-color: rgba(0, 0, 0, 0.0); "
+          "  box-shadow: none; "
+          "} "
+          "flowbox { "
+          "  border-radius: 12px; "
+          "  background-color: rgba(0.234, 0.234, 0.234, 1.0); "
+          "} "
+          "flowboxchild { "
+          "  min-width: 100px;"
+          "  min-height: 100px;"
+          "  border-radius: 12px; "
+          "  padding: 8px; "
+          "} "
+          "flowboxchild:selected { "
+          "  background-color: rgba(255, 255, 255, 0.15); "
+          "} "
+          ".app-icon label { "
+          "  color: white; "
+          "  font-weight: bold; "
+          "  margin-top: 5px; "
+          "}");
+    }
+
+    Gtk::StyleContext::add_provider_for_display(
+        Gdk::Display::get_default(), cssProvider,
+        GTK_STYLE_PROVIDER_PRIORITY_USER);
+  } catch (const std::exception &ex) {
+    std::cerr << "Erro to load the CSS: " << ex.what() << std::endl;
+  }
 }
 
 bool HyprtabWindow::onWindowKeyPressed(guint keyval, guint /*keycode*/,
